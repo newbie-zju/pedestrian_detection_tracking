@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find hk_video_publisher)/launch/hk_video_publisher.launch"/>
+</launch>
+
