@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="pedstrian_detection" name="pedstrian_detection_node" type="pedstrian_detection_node.py" output="screen">
+  </node>
+</launch>

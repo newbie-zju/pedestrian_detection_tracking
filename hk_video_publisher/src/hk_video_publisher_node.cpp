@@ -147,7 +147,6 @@ int main(int argc, char **argv) {
     if (!ros::param::get("~show_image_flag", show_image_flag))show_image_flag = true;
     string WINDOW_NAME = "hk_org";
     if (show_image_flag)namedWindow(WINDOW_NAME, WINDOW_NORMAL);
-    bool camera_open_flag = true;
     double public_rate;
     if (!ros::param::get("~public_rate", public_rate))public_rate = 30.0;
     //hk
@@ -167,10 +166,10 @@ int main(int argc, char **argv) {
     int ret = pthread_create(&getframe, NULL, RunIPCameraInfo, NULL);
     if (ret != 0) {
         printf("Create pthread error!\n");
-        camera_open_flag = false;
+        return -1;
     }
 
-    while (ros::ok() && camera_open_flag) {
+    while (ros::ok()) {
         pthread_mutex_lock(&mutex);
         if (g_frameList.size()) {
             src = g_frameList.back();
@@ -189,10 +188,10 @@ int main(int argc, char **argv) {
 
             image_pub_.publish(im);
 //            ros::spinOnce();
-            rate.sleep();
+            g_frameList.clear();
         }
-        g_frameList.clear();
         pthread_mutex_unlock(&mutex);
+        rate.sleep();
     }
     return 0;
 }  

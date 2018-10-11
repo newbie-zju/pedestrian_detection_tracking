@@ -1,4 +1,5 @@
 <launch>
   <include file="$(find hk_video_publisher)/launch/hk_video_publisher.launch"/>
+  <include file="$(find pedstrian_detection)/launch/pedstrian_detection_node.launch"/>
 </launch>
 
