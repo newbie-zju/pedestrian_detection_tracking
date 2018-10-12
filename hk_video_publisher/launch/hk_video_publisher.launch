@@ -4,6 +4,8 @@
     <param name="ip" type="string" value="192.168.0.200"/>
     <param name="username" type="string" value="admin"/>
     <param name="passwd" type="string" value="zjucsc301"/>
+    <param name="video_height" type="int" value="540"/>
+    <param name="video_width" type="int" value="960"/>
     <param name="public_rate" type="double" value="10.0"/>
     <param name="pubiic_topic" type="string" value="/hk_video"/>
   </node>

@@ -10,12 +10,12 @@ class TrackingDecision(object):
     # node
     subscribed_topic = '/pedstrian_bboxes'
     pub_topic = '/tracking_decision'
-    track_duration = 10.0
+    tracking_duration = 10.0
 
     # parameters do not need to modify
     # node
-    # image_sub = rospy.Subscriber()
-    # box_pub = rospy.Publisher()
+    # box_sub = rospy.Subscriber()
+    # decision_pub = rospy.Publisher()
     begin_time = -1
 
 
@@ -25,9 +25,50 @@ class TrackingDecision(object):
         self.decision_pub = rospy.Publisher(self.pub_topic, TrackingDecisionResult, queue_size=1)
 
     def box_callback(self, msg):
-        if msg.
-        if rospy.get_time() - self.begin_time < self.track_duration:
-            return
+        box_person = self.get_person_box(msg.bboxes)
+        has_person = False if len(box_person) < 1 else True
+        overtime = False if rospy.get_time() - self.begin_time < self.tracking_duration else True
+
+        pub_msg = TrackingDecisionResult()
+        pub_msg.header = msg.header
+        if has_person and overtime:
+            pub_msg.run = True
+            pub_msg.begin = True
+            pub_msg.init_box = self.get_init_box(box_person)
+            self.begin_time = rospy.get_time()
+        elif has_person and not overtime:
+            pub_msg.run = True
+            pub_msg.begin = False
+        elif not has_person and overtime:
+            pub_msg.run = False
+            pub_msg.begin = False
+        elif not has_person and not overtime:
+            pub_msg.run = True
+            pub_msg.begin = False
+        else:
+            print("tracking decision, box_callback, pub bug")
+
+        self.decision_pub.publish(pub_msg)
+
+
+    def get_init_box(self, box_person):
+        max_box = ""
+        max_area = -1
+        for box in box_person:
+            area = (box.xmax - box.xmin) * (box.ymax - box.ymin)
+            if area > max_area:
+                max_area = area
+                max_box = box
+        return max_box
+
+
+    def get_person_box(self, bboxes):
+        box_person = []
+        for box in bboxes:
+            if box.Class == "person":
+                box_person.append(box)
+        return box_person
+
 
 
 

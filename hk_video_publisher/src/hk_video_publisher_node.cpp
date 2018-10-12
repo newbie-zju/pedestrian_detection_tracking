@@ -28,6 +28,8 @@ int nPort = -1;
 list<cv::Mat> g_frameList;
 static Mat dst;
 pthread_mutex_t mutex;
+int hk_video_height = 1080;
+int hk_video_width = 1920;
 
 void CALLBACK DecCBFun(LONG nPort, char *pBuf, LONG nSize, FRAME_INFO *pFrameInfo, void *nReserved1, LONG nReserved2) {
     long lFrameType = pFrameInfo->nType;
@@ -35,6 +37,7 @@ void CALLBACK DecCBFun(LONG nPort, char *pBuf, LONG nSize, FRAME_INFO *pFrameInf
         dst.create(pFrameInfo->nHeight, pFrameInfo->nWidth, CV_8UC3);
         cv::Mat src(pFrameInfo->nHeight + pFrameInfo->nHeight / 2, pFrameInfo->nWidth, CV_8UC1, (uchar *) pBuf);
         cv::cvtColor(src, dst, CV_YUV2BGR_YV12);
+        cv::resize(dst,dst,Size(hk_video_width, hk_video_height));
         pthread_mutex_lock(&mutex);
         g_frameList.push_back(dst);
         pthread_mutex_unlock(&mutex);
@@ -139,14 +142,17 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "hk_video_publisher_node");
     ros::NodeHandle nh_;
     image_transport::ImageTransport it_(nh_);
-    string pubiic_topic;
-    if (!ros::param::get("~pubiic_topic", pubiic_topic))pubiic_topic = "/hk_video";
-    image_transport::Publisher image_pub_ = it_.advertise(pubiic_topic, 1);
+    string pubic_topic;
+    if (!ros::param::get("~pubic_topic", pubic_topic))pubic_topic = "/hk_video";
+    image_transport::Publisher image_pub_ = it_.advertise(pubic_topic, 1);
     //camera
     bool show_image_flag;
     if (!ros::param::get("~show_image_flag", show_image_flag))show_image_flag = true;
     string WINDOW_NAME = "hk_org";
     if (show_image_flag)namedWindow(WINDOW_NAME, WINDOW_NORMAL);
+    string video_height, video_width;
+    if (!ros::param::get("~video_height", hk_video_height))hk_video_height = 1080;
+    if (!ros::param::get("~video_width", hk_video_width))hk_video_width = 1920;
     double public_rate;
     if (!ros::param::get("~public_rate", public_rate))public_rate = 30.0;
     //hk
@@ -176,7 +182,7 @@ int main(int argc, char **argv) {
 
             rostime = ros::Time::now();
             cvi.header.stamp = rostime;
-            cvi.header.frame_id = "my video";
+            cvi.header.frame_id = "";
             cvi.encoding = "bgr8";
             cvi.image = src;
             cvi.toImageMsg(im);
