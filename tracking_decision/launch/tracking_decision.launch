@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="tracking_decision" name="tracking_decision_node" type="tracking_decision_node.py" output="screen">
+    </node>
+</launch>
