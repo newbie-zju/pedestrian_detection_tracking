@@ -2,5 +2,6 @@
   <include file="$(find hk_video_publisher)/launch/hk_video_publisher.launch"/>
   <include file="$(find pedstrian_detection)/launch/pedstrian_detection.launch"/>
   <include file="$(find tracking_decision)/launch/tracking_decision.launch"/>
+  <include file="$(find kcf_tracker)/launch/kcf_tracker.launch"/>
 </launch>
 
