@@ -9,12 +9,13 @@ project(kcf_tracker)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
-  image_transport
+#  image_transport
   pdt_msgs
   roscpp
   rospy
   sensor_msgs
   std_msgs
+  message_filters
 )
 
 ## System dependencies are found with CMake's conventions

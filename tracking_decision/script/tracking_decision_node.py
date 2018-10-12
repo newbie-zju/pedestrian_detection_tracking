@@ -10,7 +10,7 @@ class TrackingDecision(object):
     # node
     subscribed_topic = '/pedstrian_bboxes'
     pub_topic = '/tracking_decision'
-    tracking_duration = 10.0
+    tracking_duration = 2.0
 
     # parameters do not need to modify
     # node
