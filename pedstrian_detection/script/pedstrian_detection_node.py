@@ -110,6 +110,6 @@ class DetectVideo(object):
 
 if __name__ == '__main__':
     print('opencv: ' + cv2.__version__)
-    rospy.init_node('pedstrian_detection_node', anonymous=True)
+    rospy.init_node('pedstrian_detection_node', anonymous=False)
     mrd = DetectVideo()
     rospy.spin()
