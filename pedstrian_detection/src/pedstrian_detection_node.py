@@ -12,12 +12,15 @@ import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from detect_image import DetectImage
+from pdt_msgs.msg import BoundingBox
+from pdt_msgs.msg import BoundingBoxes
 
 
 class DetectVideo(object):
     # parameters need to modify
     # node
     subscribed_topic = '/hk_video'
+    pub_topic = '/pedstrian_bboxes'
     # video_output
     show_video_flag = True
     save_video_flag = False
@@ -36,7 +39,8 @@ class DetectVideo(object):
 
     # parameters do not need to modify
     # node
-    # image_sub_ = rospy.Subscriber()
+    # image_sub = rospy.Subscriber()
+    # box_pub = rospy.Publisher()
     # video_output
     image_hight = -1
     image_width = -1
@@ -52,7 +56,8 @@ class DetectVideo(object):
 
     def __init__(self):
         # node
-        self.image_sub_ = rospy.Subscriber(self.subscribed_topic, Image, self.image_callback, queue_size=1)
+        self.image_sub = rospy.Subscriber(self.subscribed_topic, Image, self.image_callback, queue_size=1)
+        self.box_pub = rospy.Publisher(self.pub_topic, BoundingBoxes, queue_size=1)
         # video_output
         if self.show_video_flag:
             cv2.namedWindow(self.VIDEO_WINDOW_NAME, cv2.cv.CV_NORMAL)
@@ -80,16 +85,27 @@ class DetectVideo(object):
 
         # detect
         # self.src_3 = cv2.resize(self.src_3,(160, 120))
+        # t1 = rospy.get_time()
         cv2.cvtColor(self.src, cv2.cv.CV_BGR2RGB, self.src)  # since opencv use bgr, but tensorflow use rbg
-        self.dst = self.di.run_detect(self.src)[0]
-        cv2.cvtColor(self.dst, cv2.cv.CV_RGB2BGR, self.dst)  # since opencv use bgr, but tensorflow use rbg
+        self.dst, bboxs = self.di.run_detect(self.src, self.show_video_flag or self.save_video_flag)
+        # t2 = rospy.get_time()
+        # print("inference time: {}".format(t2-t1))
+
+        # pub
+        pub_msg = BoundingBoxes()
+        pub_msg.header = msg.header
+        pub_msg.bboxes = bboxs
+        self.box_pub.publish(pub_msg)
 
         # save and show video_output
+        if self.show_video_flag or self.save_video_flag:
+            cv2.cvtColor(self.dst, cv2.cv.CV_RGB2BGR, self.dst)  # since opencv use bgr, but tensorflow use rbg
         if self.save_video_flag:
             self.video.write(self.dst)
         if self.show_video_flag:
             cv2.imshow(self.VIDEO_WINDOW_NAME, self.dst)
             cv2.waitKey(1)
+
 
 
 if __name__ == '__main__':

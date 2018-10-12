@@ -19,6 +19,61 @@ sys.path.append(OBJECT_DETECTION_PATH)
 # Object detection imports
 from utils import label_map_util
 from utils import visualization_utils as vis_util
+from pdt_msgs.msg import BoundingBox
+
+
+def generate_bboxs(
+        image,
+        boxes,
+        classes,
+        scores,
+        category_index,
+        use_normalized_coordinates=False,
+        max_boxes_to_draw=20,
+        min_score_thresh=.5,
+        agnostic_mode=False):
+    """transform detection result to msg
+
+    Args:
+      image: uint8 numpy array with shape (img_height, img_width, 3)
+      boxes: a numpy array of shape [N, 4]
+      classes: a numpy array of shape [N]
+      scores: a numpy array of shape [N] or None.  If scores=None, then
+        this function assumes that the boxes to be plotted are groundtruth
+        boxes and plot all boxes as black with no classes or scores.
+      category_index: a dict containing category dictionaries (each holding
+        category index `id` and category name `name`) keyed by category indices.
+      use_normalized_coordinates: whether boxes is to be interpreted as
+        normalized coordinates or not.
+      max_boxes_to_draw: maximum number of boxes to visualize.  If None, draw
+        all boxes.
+      min_score_thresh: minimum score threshold for a box to be visualized
+      agnostic_mode: boolean (default: False) controlling whether to evaluate in
+        class-agnostic mode or not.  This mode will display scores but ignore
+        classes.
+    """
+
+    bboxs = []
+
+    if not max_boxes_to_draw:
+        max_boxes_to_draw = boxes.shape[0]
+
+    for i in range(min(max_boxes_to_draw, boxes.shape[0])):
+        if scores[i] > min_score_thresh:
+            if classes[i] in category_index.keys():
+                class_name = category_index[classes[i]]['name']
+                bbox = BoundingBox()
+                ymin, xmin, ymax, xmax = boxes[i].tolist()
+                bbox.ymin = int(ymin * image.shape[0])
+                bbox.xmin = int(xmin * image.shape[1])
+                bbox.ymax = int(ymax * image.shape[0])
+                bbox.xmax = int(xmax * image.shape[1])
+                bbox.score = scores[i]
+                bbox.Class = class_name
+                bboxs.append(bbox)
+            else:
+                class_name = 'N/A'
+    return bboxs
 
 
 class DetectImage(object):
@@ -81,7 +136,7 @@ class DetectImage(object):
     def __del__(self):
         self.sess.close()
 
-    def run_detect(self, image_np):
+    def run_detect(self, image_np, DRAW_BOX=True):
         '''
         run detect on a image
         :param image_np: image to detect
@@ -96,15 +151,25 @@ class DetectImage(object):
             [self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
             feed_dict={self.image_tensor: image_np_expanded})
         # Visualization of the results of a detection.
-        vis_util.visualize_boxes_and_labels_on_image_array(
+        if DRAW_BOX:
+            vis_util.visualize_boxes_and_labels_on_image_array(
+                image_np,
+                np.squeeze(boxes),
+                np.squeeze(classes).astype(np.int32),
+                np.squeeze(scores),
+                self.category_index,
+                use_normalized_coordinates=True,
+                line_thickness=8)
+
+        bboxs = generate_bboxs(
             image_np,
             np.squeeze(boxes),
             np.squeeze(classes).astype(np.int32),
             np.squeeze(scores),
             self.category_index,
-            use_normalized_coordinates=True,
-            line_thickness=8)
-        return image_np, boxes, scores, classes, num
+            use_normalized_coordinates=True)
+
+        return image_np, bboxs
 
 
 if __name__ == '__main__':
