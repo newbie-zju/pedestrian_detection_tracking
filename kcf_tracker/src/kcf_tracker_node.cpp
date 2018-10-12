@@ -10,6 +10,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include "kcftracker.hpp"
 #include "pdt_msgs/TrackingDecisionResult.h"
+#include "pdt_msgs/BoundingBox.h"
 
 using namespace cv;
 using namespace std;
@@ -27,8 +28,6 @@ public:
     message_filters::Synchronizer<syncPolicy> *sync_;
     //pub
     ros::Publisher track_pub;
-//    robot_kcftracker::KCFTracker msg_kcf;
-    //video
     string VIDEO_WINDOW_NAME;
     bool show_video_flag;
     bool save_video_flag;
@@ -60,13 +59,13 @@ public:
         sync_->registerCallback(boost::bind(&KcfTracker::image_decision_callback, this, _1, _2));
 
         //pub
-//        track_pub = nh_.advertise<robot_kcftracker::KCFTracker>("/kcf_track", 10);
+        track_pub = nh_.advertise<pdt_msgs::BoundingBox>("/track_box", 10);
 
         // video
         if (!ros::param::get("~show_video_flag", show_video_flag))show_video_flag = true;
         VIDEO_WINDOW_NAME = "kcf_track result";
         if (show_video_flag) {
-            namedWindow(VIDEO_WINDOW_NAME, WINDOW_AUTOSIZE);
+            namedWindow(VIDEO_WINDOW_NAME, WINDOW_NORMAL);
         }
         if (!ros::param::get("~save_video_flag", save_video_flag))save_video_flag = false;
         if (!ros::param::get("~video_rate", video_rate))video_rate = 10.0;
@@ -125,16 +124,15 @@ public:
                           Point(track_result.x + track_result.width, track_result.y + track_result.height),
                           Scalar(0, 255, 255), 1, 8);
 
-//        //publish massage
-//        msg_kcf.kcf_x = track_result.x;
-//        msg_kcf.kcf_y = track_result.y;
-//        msg_kcf.kcf_width = track_result.width;
-//        msg_kcf.kcf_height = track_result.height;
-//        msg_kcf.image_width = image_width;
-//        msg_kcf.image_height = image_hight;
-//        track_pub.publish(msg_kcf);
+            // pub
+            pdt_msgs::BoundingBox track_box;
+            track_box.header = decision_msg->header;
+            track_box.xmin = track_result.x;
+            track_box.ymin = track_result.y;
+            track_box.xmax = track_result.x + track_result.width;
+            track_box.ymax = track_result.y + track_result.height;
+            track_pub.publish(track_box);
         }
-
 
         //save and show video
         if (save_video_flag)

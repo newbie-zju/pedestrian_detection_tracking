@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="kcf_tracker" name="kcf_tracker_node" type="kcf_tracker_node" output="screen">
+  <node pkg="kcf_tracker" name="kcf_tracker_node" type="kcf_tracker_node" output="screen" respawn="true">
   <param name="sub_video_topic" type="string" value="/hk_video"/>
   <param name="sub_decision_topic" type="string" value="/tracking_decision"/>
   <param name="show_video_flag" type="bool" value="true"/>
