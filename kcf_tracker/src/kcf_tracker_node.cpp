@@ -98,6 +98,14 @@ public:
         cv_ptr->image.copyTo(src_3);
 
         // decision
+        // pub
+        pdt_msgs::BoundingBox track_box;
+        track_box.header = decision_msg->header;
+        track_box.xmin = -1;
+        track_box.ymin = -1;
+        track_box.xmax = -1;
+        track_box.ymax = -1;
+
         if (decision_msg->run)
         {
             if (decision_msg->begin) {
@@ -125,14 +133,14 @@ public:
                           Scalar(0, 255, 255), 1, 8);
 
             // pub
-            pdt_msgs::BoundingBox track_box;
-            track_box.header = decision_msg->header;
             track_box.xmin = track_result.x;
             track_box.ymin = track_result.y;
             track_box.xmax = track_result.x + track_result.width;
             track_box.ymax = track_result.y + track_result.height;
-            track_pub.publish(track_box);
         }
+
+        // pub
+        track_pub.publish(track_box);
 
         //save and show video
         if (save_video_flag)
