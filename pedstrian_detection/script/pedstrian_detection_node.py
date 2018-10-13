@@ -15,6 +15,9 @@ from detect_image import DetectImage
 from pdt_msgs.msg import BoundingBox
 from pdt_msgs.msg import BoundingBoxes
 
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 class DetectVideo(object):
     # parameters need to modify
@@ -85,11 +88,11 @@ class DetectVideo(object):
 
         # detect
         # self.src_3 = cv2.resize(self.src_3,(160, 120))
-        # t1 = rospy.get_time()
+        t1 = rospy.get_time()
         cv2.cvtColor(self.src, cv2.cv.CV_BGR2RGB, self.src)  # since opencv use bgr, but tensorflow use rbg
         self.dst, bboxs = self.di.run_detect(self.src, self.show_video_flag or self.save_video_flag)
-        # t2 = rospy.get_time()
-        # print("inference time: {}".format(t2-t1))
+        t2 = rospy.get_time()
+        print("inference time: {}".format(t2-t1))
 
         # pub
         pub_msg = BoundingBoxes()
