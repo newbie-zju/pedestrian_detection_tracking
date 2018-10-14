@@ -31,14 +31,13 @@ class DetectVideo(object):
     show_video_flag = True
     save_video_flag = False
     update_rate = 10.0
-    video_output_path = os.path.join(os.path.abspath('../video_output'), 'out.avi')
-    print(video_output_path)
+    video_output_path = os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "video_output"), 'out.avi')
     VIDEO_WINDOW_NAME = 'detect'
     # detect
     # Create DetectImage class
-    OBJECT_DETECTION_PATH = '/home/zj/ros_wl/src/pedestrian_detection_tracking/pedstrian_detection/lib/object_detection'
+    OBJECT_DETECTION_PATH = os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),"lib"),"object_detection")
     # Path to frozen detection graph. This is the actual model that is used for the object detection.
-    PATH_TO_CKPT = '/home/zj/ros_wl/src/pedestrian_detection_tracking/pedstrian_detection/model/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb'
+    PATH_TO_CKPT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'model/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb')
     # List of the strings that is used to add correct label for each box.
     PATH_TO_LABELS = os.path.join(OBJECT_DETECTION_PATH, 'data/mscoco_label_map.pbtxt')
     NUM_CLASSES = 90

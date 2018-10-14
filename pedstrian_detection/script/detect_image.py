@@ -13,7 +13,7 @@ import skimage.io
 import sys
 
 # Add object_detection to system path
-OBJECT_DETECTION_PATH = '/home/zj/ros_wl/src/pedestrian_detection_tracking/pedstrian_detection/lib/object_detection'
+OBJECT_DETECTION_PATH = os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),"lib"),"object_detection")
 sys.path.append(OBJECT_DETECTION_PATH)
 
 # Object detection imports
