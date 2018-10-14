@@ -2,10 +2,12 @@
   <node pkg="kcf_tracker" name="kcf_tracker_node" type="kcf_tracker_node" output="screen" respawn="true">
   <param name="sub_video_topic" type="string" value="/hk_video"/>
   <param name="sub_decision_topic" type="string" value="/tracking_decision"/>
+  <param name="pub_track_topic" type="string" value="/track_box"/>
   <param name="show_video_flag" type="bool" value="true"/>
   <param name="save_video_flag" type="bool" value="false"/>
+  <param name="update_rate" type="double" value="10.0"/>
   <param name="video_file_name" type="string" value="/home/zj/ros_wl/src/pedestrian_detection_tracking/kcf_tracker/track_output/kcf.avi"/>
-  <param name="video_rate" type="double" value="10.0"/>
+
   
   <param name="hog_flag" type="bool" value="true"/>
   <param name="fixed_window_flag" type="bool" value="false"/>

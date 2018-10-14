@@ -28,14 +28,17 @@ public:
     message_filters::Synchronizer<syncPolicy> *sync_;
     //pub
     ros::Publisher track_pub;
+    // video
+    Mat src_3;
     string VIDEO_WINDOW_NAME;
     bool show_video_flag;
     bool save_video_flag;
-    double video_rate;
+    bool is_first_frame;
+    double image_hight;
+    double image_width;
+    double update_rate;
     VideoWriter video;
     string video_file_name;
-    //frame
-    Mat src_3;
     //kcf
     KCFTracker tracker;
     bool hog_flag;
@@ -58,8 +61,10 @@ public:
         sync_ = new message_filters::Synchronizer<syncPolicy>(syncPolicy(100), *decision_sub, *image_sub);
         sync_->registerCallback(boost::bind(&KcfTracker::image_decision_callback, this, _1, _2));
 
-        //pub
-        track_pub = nh_.advertise<pdt_msgs::BoundingBox>("/track_box", 10);
+        // pub
+        string pub_track_topic;
+        if (!ros::param::get("~pub_track_topic", pub_track_topic))pub_track_topic = "/track_box";
+        track_pub = nh_.advertise<pdt_msgs::BoundingBox>(pub_track_topic, 10);
 
         // video
         if (!ros::param::get("~show_video_flag", show_video_flag))show_video_flag = true;
@@ -68,10 +73,11 @@ public:
             namedWindow(VIDEO_WINDOW_NAME, WINDOW_NORMAL);
         }
         if (!ros::param::get("~save_video_flag", save_video_flag))save_video_flag = false;
-        if (!ros::param::get("~video_rate", video_rate))video_rate = 10.0;
+        if (!ros::param::get("~update_rate", update_rate))update_rate = 10.0;
         if (!ros::param::get("~video_file_name", video_file_name))
             video_file_name = "/home/ubuntu/ros_my_workspace/src/robot_kcftracker/result/kcf.avi";
-        //kcf
+        is_first_frame = true;
+        // kcf
         if (!ros::param::get("~hog_flag", hog_flag))hog_flag = true;
         if (!ros::param::get("~fixed_window_flag", fixed_window_flag))fixed_window_flag = false;
         if (!ros::param::get("~multiscale_flag", multiscale_flag))multiscale_flag = true;
@@ -82,6 +88,16 @@ public:
 
     ~KcfTracker() {
         destroyAllWindows();
+    }
+
+    void run()
+    {
+        ros::Rate r(update_rate);
+        while (ros::ok())
+        {
+            ros::spinOnce();
+            r.sleep();
+        }
     }
 
     void image_decision_callback(const pdt_msgs::TrackingDecisionResultConstPtr &decision_msg,
@@ -96,6 +112,14 @@ public:
             return;
         }
         cv_ptr->image.copyTo(src_3);
+
+        if(save_video_flag && is_first_frame)
+        {
+            image_hight = src_3.rows;
+            image_width = src_3.cols;
+            video = VideoWriter(video_file_name, CV_FOURCC('M', 'J', 'P', 'G'), update_rate, Size(image_width, image_hight));
+            is_first_frame = false;
+        }
 
         // decision
         // pub
@@ -157,7 +181,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "kcf_tracker_node");//node name
     //class
     KcfTracker kt;//class initializing
-    ros::spin();
+    kt.run();
     return 0;
 }
 

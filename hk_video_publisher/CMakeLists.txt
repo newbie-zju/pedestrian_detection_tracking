@@ -140,12 +140,12 @@ add_executable(hk_video_publisher_node src/hk_video_publisher_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(hk_video_publisher_node
   ${catkin_LIBRARIES}
-  /home/zj/my_workspace/CH_HCNetSDK_V5.3.5.2_build20171124_Linux64/lib/libAudioRender.so
-  /home/zj/my_workspace/CH_HCNetSDK_V5.3.5.2_build20171124_Linux64/lib/libHCCore.so
-  /home/zj/my_workspace/CH_HCNetSDK_V5.3.5.2_build20171124_Linux64/lib/libhcnetsdk.so
-  /home/zj/my_workspace/CH_HCNetSDK_V5.3.5.2_build20171124_Linux64/lib/libhpr.so
-  /home/zj/my_workspace/CH_HCNetSDK_V5.3.5.2_build20171124_Linux64/lib/libPlayCtrl.so
-  /home/zj/my_workspace/CH_HCNetSDK_V5.3.5.2_build20171124_Linux64/lib/libSuperRender.so
+  ${PROJECT_SOURCE_DIR}/lib/libAudioRender.so
+  libHCCore.so
+  libhcnetsdk.so
+  libhpr.so
+  libPlayCtrl.so
+  libSuperRender.so
 )
 
 #############
