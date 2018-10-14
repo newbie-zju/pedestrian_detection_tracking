@@ -1,6 +1,6 @@
 <launch>
   <node pkg="hk_video_publisher" name="hk_video_publisher_node" type="hk_video_publisher_node" output="screen" respawn="true">
-    <param name="show_image_flag" type="bool" value="true"/>
+    <param name="show_image_flag" type="bool" value="false"/>
     <param name="ip" type="string" value="192.168.0.200"/>
     <param name="username" type="string" value="admin"/>
     <param name="passwd" type="string" value="zjucsc301"/>

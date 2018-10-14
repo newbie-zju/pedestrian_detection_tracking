@@ -32,7 +32,7 @@ class DetectVideo(object):
     # video_output
     image_hight = 540
     image_width = 960
-    show_video_flag = True
+    show_video_flag = False
     save_video_flag = False
     update_rate = 10.0
     video_output_path = os.path.join(
@@ -82,7 +82,7 @@ class DetectVideo(object):
         if not self.ready_flag:
             return
         update_time = rospy.get_time()
-        if update_time - self.update_time_last < (1.0 / self.update_rate):
+        if update_time - self.update_time_last < 0.9 * (1.0 / self.update_rate):
             return
         else:
             self.update_time_last = update_time
@@ -97,12 +97,12 @@ class DetectVideo(object):
             self.is_first_frame = False
 
         # detect
-        t1 = rospy.get_time()
+        # t1 = rospy.get_time()
         self.src = cv2.resize(self.src, (int(self.image_width), int(self.image_hight)))
         self.src = cv2.cvtColor(self.src, cv2.COLOR_BGR2RGB)  # since opencv use bgr, but tensorflow use rbg
         self.dst, bboxs = self.di.run_detect(self.src, self.show_video_flag or self.save_video_flag)
-        t2 = rospy.get_time()
-        print("inference time: {}".format(t2 - t1))
+        # t2 = rospy.get_time()
+        # print("inference time: {}".format(t2 - t1))
 
         # pub
         pub_msg = BoundingBoxes()
