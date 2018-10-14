@@ -29,13 +29,13 @@ public:
     //pub
     ros::Publisher track_pub;
     // video
-    Mat src_3;
+    Mat src;
     string VIDEO_WINDOW_NAME;
     bool show_video_flag;
     bool save_video_flag;
     bool is_first_frame;
-    double image_hight;
-    double image_width;
+    int image_height;
+    int image_width;
     double update_rate;
     VideoWriter video;
     string video_file_name;
@@ -69,11 +69,12 @@ public:
         // video
         if (!ros::param::get("~show_video_flag", show_video_flag))show_video_flag = true;
         VIDEO_WINDOW_NAME = "kcf_track result";
-        if (show_video_flag) {
+        if (show_video_flag)
             namedWindow(VIDEO_WINDOW_NAME, WINDOW_NORMAL);
-        }
         if (!ros::param::get("~save_video_flag", save_video_flag))save_video_flag = false;
         if (!ros::param::get("~update_rate", update_rate))update_rate = 10.0;
+        if (!ros::param::get("~image_height", image_height))image_height = 540;
+        if (!ros::param::get("~image_width", image_width))image_width = 960;
         if (!ros::param::get("~video_file_name", video_file_name))
             video_file_name = "/home/ubuntu/ros_my_workspace/src/robot_kcftracker/result/kcf.avi";
         is_first_frame = true;
@@ -82,7 +83,7 @@ public:
         if (!ros::param::get("~fixed_window_flag", fixed_window_flag))fixed_window_flag = false;
         if (!ros::param::get("~multiscale_flag", multiscale_flag))multiscale_flag = true;
         if (!ros::param::get("~lab_flag", lab_flag))lab_flag = false;
-        if (lab_flag == true)hog_flag = true;
+        if (lab_flag)hog_flag = true;
         tracker = KCFTracker(hog_flag, fixed_window_flag, multiscale_flag, lab_flag);
     }
 
@@ -111,13 +112,11 @@ public:
             ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
         }
-        cv_ptr->image.copyTo(src_3);
+        cv_ptr->image.copyTo(src);
 
-        if(save_video_flag && is_first_frame)
+        if(is_first_frame && save_video_flag)
         {
-            image_hight = src_3.rows;
-            image_width = src_3.cols;
-            video = VideoWriter(video_file_name, CV_FOURCC('M', 'J', 'P', 'G'), update_rate, Size(image_width, image_hight));
+            video = VideoWriter(video_file_name, CV_FOURCC('M', 'J', 'P', 'G'), update_rate, Size(image_width, image_height));
             is_first_frame = false;
         }
 
@@ -129,38 +128,47 @@ public:
         track_box.ymin = -1;
         track_box.xmax = -1;
         track_box.ymax = -1;
+        track_box.xmin_normal = -1;
+        track_box.ymin_normal = -1;
+        track_box.xmax_normal = -1;
+        track_box.ymax_normal = -1;
 
         if (decision_msg->run)
         {
+            resize(src,src,Size(image_width, image_height));
             if (decision_msg->begin) {
                 //initializing kcf tracker
                 // Using min and max of X and Y for groundtruth rectangle
-                int init_xMin = decision_msg->init_box.xmin;
-                int init_yMin = decision_msg->init_box.ymin;
-                int init_xMax = decision_msg->init_box.xmax;
-                int init_yMax = decision_msg->init_box.ymax;
+                int init_xMin = int(decision_msg->init_box.xmin_normal * image_width);
+                int init_yMin = int(decision_msg->init_box.ymin_normal * image_height);
+                int init_xMax = int(decision_msg->init_box.xmax_normal * image_width);
+                int init_yMax = int(decision_msg->init_box.ymax_normal * image_height);
                 int init_width = init_xMax - init_xMin;
                 int init_height = init_yMax - init_yMin;
                 // First frame, give the groundtruth to the tracker
-                tracker.init(Rect(init_xMin, init_yMin, init_width, init_height), src_3);
+                tracker.init(Rect(init_xMin, init_yMin, init_width, init_height), src);
 
                 if (show_video_flag || save_video_flag)
-                    rectangle(src_3, Point(init_xMin, init_yMin), Point(init_xMax, init_yMax), Scalar(0, 255, 255), 1, 8);
+                    rectangle(src, Point(init_xMin, init_yMin), Point(init_xMax, init_yMax), Scalar(0, 255, 255), 8, 8);
                 return;
             }
 
             //kcf update
-            track_result = tracker.update(src_3);
+            track_result = tracker.update(src);
             if (show_video_flag || save_video_flag)
-                rectangle(src_3, Point(track_result.x, track_result.y),
+                rectangle(src, Point(track_result.x, track_result.y),
                           Point(track_result.x + track_result.width, track_result.y + track_result.height),
-                          Scalar(0, 255, 255), 1, 8);
+                          Scalar(0, 255, 255), 8, 8);
 
             // pub
             track_box.xmin = track_result.x;
             track_box.ymin = track_result.y;
             track_box.xmax = track_result.x + track_result.width;
             track_box.ymax = track_result.y + track_result.height;
+            track_box.xmin_normal = double(track_box.xmin)/image_width;
+            track_box.ymin_normal = double(track_box.ymin)/image_height;
+            track_box.xmax_normal = double(track_box.xmax)/image_width;
+            track_box.ymax_normal = double(track_box.ymax)/image_height;
         }
 
         // pub
@@ -168,9 +176,9 @@ public:
 
         //save and show video
         if (save_video_flag)
-            video << src_3;
+            video << src;
         if (show_video_flag) {
-            imshow(VIDEO_WINDOW_NAME, src_3);
+            imshow(VIDEO_WINDOW_NAME, src);
             waitKey(1);
         }
     }

@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import os
 import cv2
+
 if cv2.__version__[0] == "3":
     cv2.cv.CV_FOURCC = cv2.VideoWriter_fourcc
 
@@ -18,6 +19,7 @@ from detect_image import DetectImage
 from pdt_msgs.msg import BoundingBox
 from pdt_msgs.msg import BoundingBoxes
 
+
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
@@ -28,28 +30,29 @@ class DetectVideo(object):
     subscribed_topic = '/hk_video'
     pub_topic = '/pedstrian_bboxes'
     # video_output
+    image_hight = 540
+    image_width = 960
     show_video_flag = True
     save_video_flag = False
     update_rate = 10.0
-    video_output_path = os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "video_output"), 'out.avi')
+    video_output_path = os.path.join(
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "video_output"), 'out.avi')
     VIDEO_WINDOW_NAME = 'detect'
     # detect
     # Create DetectImage class
-    OBJECT_DETECTION_PATH = os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),"lib"),"object_detection")
+    OBJECT_DETECTION_PATH = os.path.join(
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "lib"), "object_detection")
     # Path to frozen detection graph. This is the actual model that is used for the object detection.
-    PATH_TO_CKPT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'model/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb')
+    PATH_TO_CKPT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                'model/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb')
     # List of the strings that is used to add correct label for each box.
     PATH_TO_LABELS = os.path.join(OBJECT_DETECTION_PATH, 'data/mscoco_label_map.pbtxt')
     NUM_CLASSES = 90
-
 
     # parameters do not need to modify
     # node
     # image_sub = rospy.Subscriber()
     # box_pub = rospy.Publisher()
-    # video_output
-    image_hight = -1
-    image_width = -1
     video = 'VideoWriter'
     update_time_last = -1
     # frame
@@ -72,7 +75,6 @@ class DetectVideo(object):
         self.di = DetectImage(self.PATH_TO_CKPT, self.PATH_TO_LABELS, self.NUM_CLASSES)
         self.ready_flag = True
 
-
     def __del__(self):
         cv2.destroyAllWindows()
 
@@ -80,7 +82,7 @@ class DetectVideo(object):
         if not self.ready_flag:
             return
         update_time = rospy.get_time()
-        if update_time - self.update_time_last < (1.0/self.update_rate):
+        if update_time - self.update_time_last < (1.0 / self.update_rate):
             return
         else:
             self.update_time_last = update_time
@@ -90,18 +92,17 @@ class DetectVideo(object):
             print(e)
             return
         if self.save_video_flag and self.is_first_frame:
-            self.image_hight, self.image_width, channels = self.src.shape
             self.video = cv2.VideoWriter(self.video_output_path, cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'),
                                          int(self.update_rate), (int(self.image_width), int(self.image_hight)))
             self.is_first_frame = False
 
         # detect
-        # self.src_3 = cv2.resize(self.src_3,(160, 120))
-        # t1 = rospy.get_time()
-        cv2.cvtColor(self.src, cv2.COLOR_BGR2RGB, self.src)  # since opencv use bgr, but tensorflow use rbg
+        t1 = rospy.get_time()
+        self.src = cv2.resize(self.src, (int(self.image_width), int(self.image_hight)))
+        self.src = cv2.cvtColor(self.src, cv2.COLOR_BGR2RGB)  # since opencv use bgr, but tensorflow use rbg
         self.dst, bboxs = self.di.run_detect(self.src, self.show_video_flag or self.save_video_flag)
-        # t2 = rospy.get_time()
-        # print("inference time: {}".format(t2-t1))
+        t2 = rospy.get_time()
+        print("inference time: {}".format(t2 - t1))
 
         # pub
         pub_msg = BoundingBoxes()
@@ -111,13 +112,12 @@ class DetectVideo(object):
 
         # save and show video_output
         if self.show_video_flag or self.save_video_flag:
-            cv2.cvtColor(self.dst, cv2.COLOR_RGB2BGR, self.dst)  # since opencv use bgr, but tensorflow use rbg
+            self.dst = cv2.cvtColor(self.dst, cv2.COLOR_RGB2BGR)  # since opencv use bgr, but tensorflow use rbg
         if self.save_video_flag:
             self.video.write(self.dst)
         if self.show_video_flag:
             cv2.imshow(self.VIDEO_WINDOW_NAME, self.dst)
             cv2.waitKey(1)
-
 
 
 if __name__ == '__main__':

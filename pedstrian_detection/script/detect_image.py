@@ -68,6 +68,10 @@ def generate_bboxs(
                 bbox.xmin = int(xmin * image.shape[1])
                 bbox.ymax = int(ymax * image.shape[0])
                 bbox.xmax = int(xmax * image.shape[1])
+                bbox.ymin_normal = ymin
+                bbox.xmin_normal = xmin
+                bbox.ymax_normal = ymax
+                bbox.xmax_normal = xmax
                 bbox.score = scores[i]
                 bbox.Class = class_name
                 bboxs.append(bbox)

@@ -3,5 +3,9 @@ int32 xmin
 int32 ymin
 int32 xmax
 int32 ymax
+float64 xmin_normal
+float64 ymin_normal
+float64 xmax_normal
+float64 ymax_normal
 string Class
-float32 score
+float64 score
