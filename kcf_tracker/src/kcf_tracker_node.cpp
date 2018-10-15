@@ -84,6 +84,7 @@ public:
     ros::Publisher track_pub;
     // video
     double update_time_last;
+    bool track_init_success;
     Mat src;
     string VIDEO_WINDOW_NAME;
     bool show_video_flag;
@@ -122,6 +123,7 @@ public:
 
         // video
         update_time_last = 0.0;
+        track_init_success = false;
         if (!ros::param::get("~show_video_flag", show_video_flag))show_video_flag = true;
         VIDEO_WINDOW_NAME = "kcf_track result";
         if (show_video_flag)
@@ -214,28 +216,32 @@ public:
                 int init_height = init_yMax - init_yMin;
                 // First frame, give the groundtruth to the tracker
                 tracker.init(Rect(init_xMin, init_yMin, init_width, init_height), src);
-
-                if (show_video_flag || save_video_flag)
-                    rectangle(src, Point(init_xMin, init_yMin), Point(init_xMax, init_yMax), Scalar(0, 255, 255), 8, 8);
-                return;
+                track_init_success = true;
             }
 
-            //kcf update
-            track_result = tracker.update(src);
-            if (show_video_flag || save_video_flag)
-                rectangle(src, Point(track_result.x, track_result.y),
-                          Point(track_result.x + track_result.width, track_result.y + track_result.height),
-                          Scalar(0, 255, 255), 8, 8);
+            if(track_init_success)
+            {
+                //kcf update
+                track_result = tracker.update(src);
+                if (show_video_flag || save_video_flag)
+                    rectangle(src, Point(track_result.x, track_result.y),
+                              Point(track_result.x + track_result.width, track_result.y + track_result.height),
+                              Scalar(0, 255, 255), 8, 8);
 
-            // pub
-            track_box.xmin = track_result.x;
-            track_box.ymin = track_result.y;
-            track_box.xmax = track_result.x + track_result.width;
-            track_box.ymax = track_result.y + track_result.height;
-            track_box.xmin_normal = double(track_box.xmin) / image_width;
-            track_box.ymin_normal = double(track_box.ymin) / image_height;
-            track_box.xmax_normal = double(track_box.xmax) / image_width;
-            track_box.ymax_normal = double(track_box.ymax) / image_height;
+                // pub
+                track_box.xmin = track_result.x;
+                track_box.ymin = track_result.y;
+                track_box.xmax = track_result.x + track_result.width;
+                track_box.ymax = track_result.y + track_result.height;
+                track_box.xmin_normal = double(track_box.xmin) / image_width;
+                track_box.ymin_normal = double(track_box.ymin) / image_height;
+                track_box.xmax_normal = double(track_box.xmax) / image_width;
+                track_box.ymax_normal = double(track_box.ymax) / image_height;
+            }
+        }
+        else
+        {
+            track_init_success = false;
         }
 
         // pub

@@ -4,20 +4,25 @@
 from pdt_msgs.msg import BoundingBoxes
 from pdt_msgs.msg import TrackingDecisionResult
 import rospy
+import os
+import pygame
+import time
+
 
 class TrackingDecision(object):
     # parameters need to modify
-    # node
     subscribed_topic = '/pedstrian_bboxes'
     pub_topic = '/tracking_decision'
     tracking_duration = 2.0
+    alarm_interval_sec = 30
+    alarm_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'alarm.mp3')
 
     # parameters do not need to modify
-    # node
     # box_sub = rospy.Subscriber()
     # decision_pub = rospy.Publisher()
     begin_time = -1
-
+    alarm_begin = False
+    alarm_begin_time = -1
 
     def __init__(self):
         # node
@@ -36,6 +41,11 @@ class TrackingDecision(object):
             pub_msg.begin = True
             pub_msg.init_box = self.get_init_box(box_person)
             self.begin_time = rospy.get_time()
+
+            alarm_overtime = False if rospy.get_time() - self.alarm_begin_time < self.alarm_interval_sec else True
+            if alarm_overtime:
+                self.alarm_begin = True
+                self.alarm_begin_time = rospy.get_time()
         elif has_person and not overtime:
             pub_msg.run = True
             pub_msg.begin = False
@@ -50,7 +60,6 @@ class TrackingDecision(object):
 
         self.decision_pub.publish(pub_msg)
 
-
     def get_init_box(self, box_person):
         max_box = ""
         max_area = -1
@@ -61,7 +70,6 @@ class TrackingDecision(object):
                 max_box = box
         return max_box
 
-
     def get_person_box(self, bboxes):
         box_person = []
         for box in bboxes:
@@ -69,11 +77,22 @@ class TrackingDecision(object):
                 box_person.append(box)
         return box_person
 
-
-
-
+def play_alarm(td):
+    while not rospy.is_shutdown():
+        time.sleep(0.1)
+        if td.alarm_begin:
+            print("alarm")
+            td.alarm_begin = False
+            pygame.mixer.init()
+            pygame.mixer.music.load(td.alarm_file)
+            pygame.mixer.music.play()
+            time.sleep(5.8)
+            pygame.mixer.music.stop()
 
 if __name__ == '__main__':
     rospy.init_node('tracking_decision_node', anonymous=False)
     td = TrackingDecision()
+    while not rospy.is_shutdown():
+        play_alarm(td)
+        time.sleep(0.1)
     rospy.spin()
