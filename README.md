@@ -30,3 +30,16 @@ for wen ling
     # add
     export PYTHONPATH=/home/zj/ros_wl/src/pedestrian_detection_tracking/pedstrian_detection/lib/object_detection:$PYTHONPATH
     export PYTHONPATH=/home/zj/ros_wl/src/pedestrian_detection_tracking/pedstrian_detection/lib:$PYTHONPATH
+
+**object_detection**
+
+    sudo pip install scikit-image
+    sudo apt-get install protobuf-compiler
+    # cd to pedestrian_detection_tracking/pedstrian_detection/lib
+    protoc object_detection/protos/*.proto --python_out=.
+
+### tracking_decision
+
+    sudo pip install pygame
+
+    
