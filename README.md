@@ -34,9 +34,6 @@ for wen ling
 **object_detection**
 
     sudo pip install scikit-image
-    sudo apt-get install protobuf-compiler
-    # cd to pedestrian_detection_tracking/pedstrian_detection/lib
-    protoc object_detection/protos/*.proto --python_out=.
 
 ### tracking_decision
 
