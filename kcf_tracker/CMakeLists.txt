@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(OpenCV REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -153,6 +153,7 @@ add_dependencies(kcf_tracker_node pdt_msgs_generate_messages_cpp ${${PROJECT_NAM
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kcf_tracker_node
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 
 #############
