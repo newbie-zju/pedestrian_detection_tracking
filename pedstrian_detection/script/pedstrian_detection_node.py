@@ -7,10 +7,6 @@ from __future__ import print_function
 
 import os
 import cv2
-
-if cv2.__version__[0] == "3":
-    cv2.cv.CV_FOURCC = cv2.VideoWriter_fourcc
-
 import numpy as np
 import rospy
 from cv_bridge import CvBridge, CvBridgeError
@@ -92,8 +88,13 @@ class DetectVideo(object):
             print(e)
             return
         if self.save_video_flag and self.is_first_frame:
-            self.video = cv2.VideoWriter(self.video_output_path, cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'),
-                                         int(self.update_rate), (int(self.image_width), int(self.image_hight)))
+            if cv2.__version__[0] == "3":
+                self.video = cv2.VideoWriter(self.video_output_path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
+                                             int(self.update_rate), (int(self.image_width), int(self.image_hight)))
+            else:
+                self.video = cv2.VideoWriter(self.video_output_path, cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'),
+                                             int(self.update_rate), (int(self.image_width), int(self.image_hight)))
+
             self.is_first_frame = False
 
         # detect
