@@ -22,6 +22,7 @@ public:
     pdt_msgs::TrackingDecisionResult decision;
     vector<sensor_msgs::Image> images;
     double image_max_keep_time;
+    int count = 0;
 
     DecisionImageSync() {
         image_max_keep_time = 10.0;
@@ -54,10 +55,12 @@ public:
             if ( (decision.header.stamp.toSec() > images.front().header.stamp.toSec()))
             {
                 images.erase(images.begin());
+                count = 0;
             }
             else if (decision.header.stamp.toSec() == images.front().header.stamp.toSec()) {
                 decision_out = decision;
-                image_out = images.back();
+                image_out = images.at(count);
+                ++count;
 //                images.erase(images.begin());
                 return true;
             } else {
