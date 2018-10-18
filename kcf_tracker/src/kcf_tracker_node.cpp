@@ -60,6 +60,7 @@ public:
             else if (decision.header.stamp.toSec() == images.front().header.stamp.toSec()) {
                 decision_out = decision;
                 image_out = images.at(count);
+//                ROS_INFO_STREAM("dt: " << images.back().header.stamp.toSec() - images.at(count).header.stamp.toSec());
                 ++count;
 //                images.erase(images.begin());
                 return true;
