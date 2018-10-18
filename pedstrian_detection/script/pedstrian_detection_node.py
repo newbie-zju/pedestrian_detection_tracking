@@ -99,7 +99,8 @@ class DetectVideo(object):
 
         # detect
         # t1 = rospy.get_time()
-        self.src = cv2.resize(self.src, (int(self.image_width), int(self.image_hight)))
+        if self.src.shape[1] != self.image_width:
+            self.src = cv2.resize(self.src, (int(self.image_width), int(self.image_hight)))
         self.src = cv2.cvtColor(self.src, cv2.COLOR_BGR2RGB)  # since opencv use bgr, but tensorflow use rbg
         self.dst, bboxs = self.di.run_detect(self.src, self.show_video_flag or self.save_video_flag)
         # t2 = rospy.get_time()

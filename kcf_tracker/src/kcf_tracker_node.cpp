@@ -208,7 +208,8 @@ public:
         track_box.ymax_normal = -1;
 
         if (decision_msg.run) {
-            resize(src, src, Size(image_width, image_height));
+            if (src.cols != image_width)
+                resize(src, src, Size(image_width, image_height));
             if (decision_msg.begin) {
                 //initializing kcf tracker
                 // Using min and max of X and Y for groundtruth rectangle
