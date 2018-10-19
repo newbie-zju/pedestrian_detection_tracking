@@ -40,10 +40,11 @@ class DetectVideo(object):
         os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "lib"), "object_detection")
     # Path to frozen detection graph. This is the actual model that is used for the object detection.
     PATH_TO_CKPT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                'model/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb')
+                                'model/ssd_mobilenet_v1_person_voc12/frozen_inference_graph.pb')
     # List of the strings that is used to add correct label for each box.
-    PATH_TO_LABELS = os.path.join(OBJECT_DETECTION_PATH, 'data/mscoco_label_map.pbtxt')
-    NUM_CLASSES = 90
+    PATH_TO_LABELS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                'model/ssd_mobilenet_v1_person_voc12/pascal_person_label_map.pbtxt')
+    NUM_CLASSES = 1
 
     # parameters do not need to modify
     # node
