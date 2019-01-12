@@ -1,10 +1,14 @@
 <launch>
   <include file="$(find hk_video_publisher)/launch/hk_video_publisher.launch"/>
-  <include file="$(find pedstrian_detection)/launch/pedstrian_detection.launch"/>
+  <!--include file="$(find pedstrian_detection)/launch/pedstrian_detection.launch"/-->
   <!--<include file="$(find pedstrian_detection_opencv)/launch/pedstrian_detection_opencv.launch"/>-->
-  <include file="$(find tracking_decision)/launch/tracking_decision.launch"/>
-  <include file="$(find kcf_tracker)/launch/kcf_tracker.launch"/>
+  <!--include file="$(find tracking_decision)/launch/tracking_decision.launch"/-->
+  <!--include file="$(find kcf_tracker)/launch/kcf_tracker.launch"/-->
 
   <include file="$(find hk_control)/launch/hk_control.launch"/>
+  <include file="$(find motion_detection)/launch/motion_detection.launch"/>
+  <include file="$(find pedstrian_detection)/launch/pedstrian_detection.launch"/>
+  <include file="$(find alarm_setting_decision)/launch/alarm_setting_decision.launch"/>
+
 </launch>
 

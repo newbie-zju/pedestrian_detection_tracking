@@ -14,8 +14,8 @@ class TrackingDecision(object):
     subscribed_topic = '/pedstrian_bboxes'
     pub_topic = '/tracking_decision'
     tracking_duration = 2.0
-    alarm_interval_sec = 30
-    alarm_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'alarm.mp3')
+    alarm_interval_sec = 5
+    alarm_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'music/危险区域.mp3')
 
     # parameters do not need to modify
     # box_sub = rospy.Subscriber()
@@ -86,7 +86,7 @@ def play_alarm(td):
             pygame.mixer.init()
             pygame.mixer.music.load(td.alarm_file)
             pygame.mixer.music.play()
-            time.sleep(5.8)
+            time.sleep(1)
             pygame.mixer.music.stop()
 
 if __name__ == '__main__':
